@@ -1,6 +1,8 @@
 const startBtnEl = document.querySelector('button[data-start]');
 const stopBtnEl = document.querySelector('button[data-stop]');
 const bodyEl = document.body;
+const { style } = bodyEl;
+
 let timeId = null;
 
 stopBtnEl.disabled = true;
@@ -11,7 +13,6 @@ stopBtnEl.addEventListener('click', stopChangeBGcolorOnceInSec);
 function changeBGcolorOnceInSec() {
   startBtnEl.disabled = true;
   stopBtnEl.disabled = false;
-  const { style } = bodyEl;
 
   timeId = setInterval(() => {
     style.backgroundColor = getRandomHexColor();
@@ -20,7 +21,6 @@ function changeBGcolorOnceInSec() {
 
 function stopChangeBGcolorOnceInSec() {
   clearInterval(timeId);
-  bodyEl.removeAttribute('style');
 
   startBtnEl.disabled = false;
   stopBtnEl.disabled = true;
