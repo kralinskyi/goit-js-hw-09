@@ -12,29 +12,26 @@ const dataHoursEl = document.querySelector('[data-hours]');
 const dataMinutesEl = document.querySelector('[data-minutes]');
 const dataSecondsEl = document.querySelector('[data-seconds]');
 
+let chosenDate = null;
+let timerId = null;
+
 const options = {
+  minDate: 'today',
+  altInput: true,
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
-    if (selectedDates[0] <= Date.now()) {
-      Notify.failure('Please choose any date in the future');
-      dateInputEl.style.borderColor = 'red';
-    } else {
-      chosenDate = selectedDates[0];
+    chosenDate = selectedDates[0];
 
-      startBtnEl.disabled = false;
-      startBtnEl.addEventListener('click', timerOn);
-      dateInputEl.style.borderColor = 'red';
-    }
+    startBtnEl.disabled = false;
+    startBtnEl.addEventListener('click', timerOn);
+    dateInputEl.style.borderColor = 'red';
   },
 };
 
 startBtnEl.disabled = true;
-
-let chosenDate;
-let timerId;
 
 flatpickr('#datetime-picker', options);
 
@@ -46,15 +43,14 @@ function timerOn() {
 
     if (deltaTime < 1000) {
       clearInterval(timerId);
-
       startBtnEl.removeEventListener('click', timerOn);
-
       dateInputEl.disabled = false;
-      clearInterval(timerId);
-      Notify.info('Repeat?');
+
+      Notify.info('Choose another date!');
     }
 
     const { days, hours, minutes, seconds } = convertMs(deltaTime);
+
     updateClock({ days, hours, minutes, seconds });
   }, 1000);
 }
@@ -85,4 +81,6 @@ function convertMs(ms) {
   return { days, hours, minutes, seconds };
 }
 
-const addZero = value => String(value).padStart(2, '0');
+function addZero(value) {
+  return String(value).padStart(2, '0');
+}
