@@ -1,86 +1,93 @@
-// Описаний в документації
 import flatpickr from 'flatpickr';
-// Додатковий імпорт стилів
 import 'flatpickr/dist/flatpickr.min.css';
-// Заміна alert
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-const dateInputEl = document.querySelector('#datetime-picker');
-const startBtnEl = document.querySelector('[data-start]');
-const dataDaysEl = document.querySelector('[data-days]');
-const dataHoursEl = document.querySelector('[data-hours]');
-const dataMinutesEl = document.querySelector('[data-minutes]');
-const dataSecondsEl = document.querySelector('[data-seconds]');
+class CountdownTimer {
+  constructor(selector) {
+    this.dateInputEl = document.querySelector(selector);
+    this.startBtnEl = document.querySelector('[data-start]');
+    this.dataDaysEl = document.querySelector('[data-days]');
+    this.dataHoursEl = document.querySelector('[data-hours]');
+    this.dataMinutesEl = document.querySelector('[data-minutes]');
+    this.dataSecondsEl = document.querySelector('[data-seconds]');
 
-let chosenDate = null;
-let timerId = null;
+    this.chosenDate = null;
+    this.timerId = null;
 
-const options = {
-  minDate: 'today',
-  altInput: true,
-  enableTime: true,
-  time_24hr: true,
-  defaultDate: new Date(),
-  minuteIncrement: 1,
+    this.options = {
+      minDate: 'today',
+      altInput: true,
+      enableTime: true,
+      time_24hr: true,
+      defaultDate: new Date(),
+      minuteIncrement: 1,
+      onClose: this.onClose.bind(this),
+    };
+
+    this.startBtnEl.disabled = true;
+
+    flatpickr(selector, this.options);
+  }
+
   onClose(selectedDates) {
-    chosenDate = selectedDates[0];
+    this.chosenDate = selectedDates[0];
 
-    startBtnEl.disabled = false;
-    startBtnEl.addEventListener('click', timerOn);
-    dateInputEl.style.borderColor = 'red';
-  },
-};
+    this.startBtnEl.disabled = false;
+    this.startBtnEl.addEventListener('click', this.timerOn.bind(this));
+    this.dateInputEl.style.borderColor = 'red';
+  }
 
-startBtnEl.disabled = true;
+  timerOn() {
+    this.timerId = setInterval(() => {
+      this.startBtnEl.disabled = true;
+      this.dateInputEl.disabled = true;
+      const deltaTime = this.chosenDate - Date.now();
 
-flatpickr('#datetime-picker', options);
+      if (deltaTime < 1000) {
+        clearInterval(this.timerId);
+        this.startBtnEl.removeEventListener('click', this.timerOn.bind(this));
+        this.dateInputEl.disabled = false;
 
-function timerOn() {
-  timerId = setInterval(() => {
-    startBtnEl.disabled = true;
-    dateInputEl.disabled = true;
-    const deltaTime = chosenDate - Date.now();
+        Notify.info('Choose another date!');
+      }
 
-    if (deltaTime < 1000) {
-      clearInterval(timerId);
-      startBtnEl.removeEventListener('click', timerOn);
-      dateInputEl.disabled = false;
+      const { days, hours, minutes, seconds } = this.convertMs(deltaTime);
 
-      Notify.info('Choose another date!');
-    }
+      this.updateClock({ days, hours, minutes, seconds });
+    }, 1000);
+  }
 
-    const { days, hours, minutes, seconds } = convertMs(deltaTime);
+  updateClock({ days, hours, minutes, seconds }) {
+    this.dataDaysEl.textContent = days;
+    this.dataHoursEl.textContent = hours;
+    this.dataMinutesEl.textContent = minutes;
+    this.dataSecondsEl.textContent = seconds;
+  }
 
-    updateClock({ days, hours, minutes, seconds });
-  }, 1000);
+  convertMs(ms) {
+    // Number of milliseconds per unit of time
+    const second = 1000;
+    const minute = second * 60;
+    const hour = minute * 60;
+    const day = hour * 24;
+
+    // Remaining days
+    const days = this.addZero(Math.floor(ms / day));
+    // Remaining hours
+    const hours = this.addZero(Math.floor((ms % day) / hour));
+    // Remaining minutes
+    const minutes = this.addZero(Math.floor(((ms % day) % hour) / minute));
+    // Remaining seconds
+    const seconds = this.addZero(
+      Math.floor((((ms % day) % hour) % minute) / second)
+    );
+
+    return { days, hours, minutes, seconds };
+  }
+
+  addZero(value) {
+    return String(value).padStart(2, '0');
+  }
 }
 
-function updateClock({ days, hours, minutes, seconds }) {
-  dataDaysEl.textContent = days;
-  dataHoursEl.textContent = hours;
-  dataMinutesEl.textContent = minutes;
-  dataSecondsEl.textContent = seconds;
-}
-
-function convertMs(ms) {
-  // Number of milliseconds per unit of time
-  const second = 1000;
-  const minute = second * 60;
-  const hour = minute * 60;
-  const day = hour * 24;
-
-  // Remaining days
-  const days = addZero(Math.floor(ms / day));
-  // Remaining hours
-  const hours = addZero(Math.floor((ms % day) / hour));
-  // Remaining minutes
-  const minutes = addZero(Math.floor(((ms % day) % hour) / minute));
-  // Remaining seconds
-  const seconds = addZero(Math.floor((((ms % day) % hour) % minute) / second));
-
-  return { days, hours, minutes, seconds };
-}
-
-function addZero(value) {
-  return String(value).padStart(2, '0');
-}
+const timer = new CountdownTimer('#datetime-picker');
