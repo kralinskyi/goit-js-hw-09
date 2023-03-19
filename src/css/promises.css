@@ -1,0 +1,41 @@
+button {
+  margin-top: 50px;
+  width: 300px;
+  height: 50px;
+  border: 1px solid #cccccc;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: rgb(10, 205, 230);
+  font-size: large;
+  text-transform: uppercase;
+}
+
+button:hover,
+button:focus {
+  background-color: cornflowerblue;
+}
+
+form {
+  margin-left: 20px;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+}
+
+label {
+  font-size: large;
+  color: #6b6a6a;
+  margin-bottom: 10px; /* додано відступ між лейблом і інпутом */
+}
+
+input {
+  margin-bottom: 20px;
+  width: 150px;
+  height: 50px;
+  padding: 0 10px;
+  border: 1px solid #cccccc;
+  background-color: #fff;
+  text-align: center;
+  font-size: large;
+}
